@@ -13,7 +13,6 @@ public class LoggableMotor implements Loggable, LoggableHardware{
 
     @Override
     public void refresh() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'refresh'");
+        
     }
 }
