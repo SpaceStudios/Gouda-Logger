@@ -1,4 +1,4 @@
-on: [pull, pullrequest, commit, push]
+on: [push]
 
 jobs:
   build:
