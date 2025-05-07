@@ -1,0 +1,20 @@
+{
+    "javaDependencies": [
+      {
+        "groupId": "log.gouda",
+        "artifactId": "gouda-logger",
+        "version": "1.0-TEST"
+      }
+    ],
+    "fileName": "GoudaLogger.json",
+    "frcYear": "2025",
+    "jsonUrl": "",
+    "name": "GoudaLogger",
+    "jniDependencies": [],
+    "mavenUrls": [
+      ""
+    ],
+    "cppDependencies": [],
+    "version": "1.0-TEST",
+    "uuid": "82ebd53a-dd2e-48ac-afb2-5672518ab83e"
+  }
