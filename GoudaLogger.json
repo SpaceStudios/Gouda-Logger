@@ -2,8 +2,8 @@
     "javaDependencies": [
       {
         "groupId": "log.gouda",
-        "artifactId": "gouda-logger",
-        "version": "1.0-TEST"
+        "artifactId": "GoudaLogger",
+        "version": "0.1"
       }
     ],
     "fileName": "GoudaLogger.json",

@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id "java-library"
     id "edu.wpi.first.GradleRIO" version "2025.1.1"
@@ -105,6 +107,29 @@ tasks.withType(JavaCompile) {
 }
 
 publishing {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        String frcYear = '2025'
+        File frcHome
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            String publicFolder = System.getenv('PUBLIC')
+            if (publicFolder == null) {
+                publicFolder = "C:\\Users\\Public"
+            }
+            def homeRoot = new File(publicFolder, "wpilib")
+            frcHome = new File(homeRoot, frcYear)
+        } else {
+            def userFolder = System.getProperty("user.home")
+            def homeRoot = new File(userFolder, "wpilib")
+            frcHome = new File(homeRoot, frcYear)
+        }
+        def frcHomeMaven = new File(frcHome, 'maven')
+        maven {
+            name 'frcHome'
+            url frcHomeMaven
+        }
+    }
     publications {
         maven(MavenPublication) {
             groupId = 'log.gouda'
