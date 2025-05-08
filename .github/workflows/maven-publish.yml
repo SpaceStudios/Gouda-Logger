@@ -31,5 +31,4 @@ jobs:
     - name: Publish to GitHub Packages Apache Maven
       run: ./gradlew publish
       env:
-        GITHUB_USER
         GITHUB_TOKEN: ${{ github.token }}
