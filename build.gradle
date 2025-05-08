@@ -1,4 +1,5 @@
 import org.apache.tools.ant.taskdefs.condition.Os
+import groovy.json.JsonSlurper
 
 plugins {
     id "java-library"
@@ -12,6 +13,11 @@ java {
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+def inputFile = new File("./.wpilib/wpilib_preferences.json")
+def json = new JsonSlurper().parseText(inputFile.Text)
+String frcCompatibleYear = json.projectYear
+String currentVersion = "0.1"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -108,9 +114,8 @@ tasks.withType(JavaCompile) {
 
 publishing {
     repositories {
-        mavenCentral()
         mavenLocal()
-        String frcYear = '2025'
+        String frcYear = frcCompatibleYear
         File frcHome
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             String publicFolder = System.getenv('PUBLIC')
@@ -134,7 +139,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'log.gouda'
             artifactId = 'GoudaLogger'
-            version = '0.1'
+            version = "${frcCompatibleYear}.${currentVersion}"
 
             from components.java
         }
