@@ -56,10 +56,12 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.networktables.Subscriber;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.util.datalog.DataLogWriter;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import log.gouda.loggingUtil.Loggable;
 
@@ -69,10 +71,26 @@ public class Gouda {
     private static HashMap<String, Subscriber> subscriberMap = new HashMap<String, Subscriber>();
     private static HashMap<String, SendableBuilder> sendableMap = new HashMap<String, SendableBuilder>();
     private static NetworkTableInstance ntInstance;
-
+    private static DataLogWriter logWriter;
+    private static boolean logData;
+    /**
+     * Start the logger but don't automatically write logs
+     */
     public static void start() {
+        start(false);
+    }
+
+    /**
+     * Start the logger and choose to automatically write the logs.
+     * @param writeLogs should use write WPILOGs for tracking data on the robot
+     */
+    public static void start(boolean writeLogs) {
         ntInstance = NetworkTableInstance.getDefault();
         ntInstance.startServer();
+        logData = writeLogs;
+        if (writeLogs) {
+
+        }
     }
 
     /**

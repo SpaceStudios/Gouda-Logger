@@ -134,13 +134,22 @@ publishing {
             name 'frcHome'
             url frcHomeMaven
         }
+
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/SpaceStudios/Gouda-Logger")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
     }
     publications {
         maven(MavenPublication) {
             groupId = 'log.gouda'
             artifactId = 'GoudaLogger'
             version = "${frcCompatibleYear}.${currentVersion}"
-
+            
             from components.java
         }
     }
