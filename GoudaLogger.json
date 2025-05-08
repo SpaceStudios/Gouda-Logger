@@ -2,8 +2,8 @@
     "javaDependencies": [
       {
         "groupId": "log.gouda",
-        "artifactId": "GoudaLogger",
-        "version": "0.1"
+        "artifactId": "gouda-logger",
+        "version": "2025.0.1"
       }
     ],
     "fileName": "GoudaLogger.json",
@@ -15,6 +15,6 @@
       ""
     ],
     "cppDependencies": [],
-    "version": "1.0-TEST",
+    "version": "2025.0.1",
     "uuid": "82ebd53a-dd2e-48ac-afb2-5672518ab83e"
   }
