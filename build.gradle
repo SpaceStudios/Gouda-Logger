@@ -139,7 +139,7 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/SpaceStudios/Gouda-Logger")
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USER")
                 password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
             }
         }

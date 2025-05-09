@@ -4,9 +4,14 @@
 
 package log.gouda;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.security.KeyStore.Entry;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import javax.crypto.spec.IvParameterSpec;
+
 import edu.wpi.first.math.geometry.Ellipse2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;
@@ -56,23 +61,37 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.networktables.Subscriber;
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DataLogEntry;
 import edu.wpi.first.util.datalog.DataLogWriter;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StructArrayLogEntry;
+import edu.wpi.first.util.datalog.StructLogEntry;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import log.gouda.loggingUtil.Loggable;
+import log.gouda.loggingUtil.LoggableHardware;
 
 /** Add your docs here. */
 public class Gouda {
     private static HashMap<String, Publisher> publisherMap = new HashMap<String, Publisher>();
     private static HashMap<String, Subscriber> subscriberMap = new HashMap<String, Subscriber>();
     private static HashMap<String, SendableBuilder> sendableMap = new HashMap<String, SendableBuilder>();
+    private static HashMap<String, DataLogEntry> logEntryMap = new HashMap<String, DataLogEntry>();
     private static NetworkTableInstance ntInstance;
-    private static DataLogWriter logWriter;
+    private static DataLog log;
     private static boolean logData;
+
+    private static String logSavePath = "/logs/latest.wpilog";
+
     /**
      * Start the logger but don't automatically write logs
      */
@@ -85,11 +104,17 @@ public class Gouda {
      * @param writeLogs should use write WPILOGs for tracking data on the robot
      */
     public static void start(boolean writeLogs) {
+        start(writeLogs, logSavePath);
+    }
+
+    public static void start(boolean writeLogs, String logPath) {
         ntInstance = NetworkTableInstance.getDefault();
         ntInstance.startServer();
         logData = writeLogs;
         if (writeLogs) {
-
+            DataLogManager.start();
+            log = DataLogManager.getLog();
+            logSavePath = logPath;
         }
     }
 
@@ -124,6 +149,16 @@ public class Gouda {
      */
     @SuppressWarnings("unchecked")
     public static <T extends StructSerializable> void log(String path, T value, Struct<T> struct) {
+        if (logData) {
+            if (logEntryMap.containsKey(path)) {
+                if (logEntryMap.get(path) instanceof StructLogEntry entry) {
+                    entry.append(value);
+                }
+            } else {
+                StructLogEntry<T> entry = StructLogEntry.create(log, path, struct);
+                entry.append(value);
+            }
+        }
         if (publisherMap.containsKey(path)) {
             if (publisherMap.get(path) instanceof StructPublisher pub) {
                 ((StructPublisher<T>) pub).set(value);
@@ -146,6 +181,17 @@ public class Gouda {
      */
     @SuppressWarnings("unchecked")
     public static <T extends StructSerializable> void log(String path, T[] value, Struct<T> struct) {
+        if (logData) {
+            if (logEntryMap.containsKey(path)) {
+                if (logEntryMap.get(path) instanceof StructArrayLogEntry entry) {
+                    entry.append(value);
+                }
+            } else {
+                StructArrayLogEntry<T> entry = StructArrayLogEntry.create(log, path, struct);
+                entry.append(value);
+                logEntryMap.put(path, entry);
+            }
+        }
         if (publisherMap.containsKey(path)) { // containsKey
             if (publisherMap.get(path) instanceof StructArrayPublisher pub) {
                 ((StructArrayPublisher<T>) pub).set(value);
@@ -164,6 +210,17 @@ public class Gouda {
      * 
      */
     public static void log(String path, double value) {
+        if (logData) {
+            if (logEntryMap.containsKey(path)) {
+                if (logEntryMap.get(path) instanceof DoubleLogEntry entry) {
+                    entry.append(value);
+                }
+            } else {
+                DoubleLogEntry entry = new DoubleLogEntry(log, path);
+                entry.append(value);
+                logEntryMap.put(path, entry);
+            }
+        }
         if (publisherMap.containsKey(path)) {
             if (publisherMap.get(path) instanceof DoublePublisher pub) {
                 pub.set(value);
@@ -515,14 +572,78 @@ public class Gouda {
         for (Field field : fields) {
             try {
                 Object value = field.get(loggableClass);
-                if (value instanceof Double dvalue) {
-                    log(path+"/"+field.getName(), dvalue);
+                if (value != null) {
+                    if (value instanceof Double dvalue) {
+                        log(path+"/"+field.getName(), dvalue);
+                    }
+                    if (value instanceof double[] dvalue) {
+                        log(path+"/"+field.getName(), dvalue);
+                    }
+                    if (value instanceof Boolean bValue) {
+                        log(path+"/"+field.getName(), bValue);
+                    }
+                    if (value instanceof boolean[] bValue) {
+                        log(path, bValue);
+                    }
+                    if (value instanceof Integer iValue) {
+                        log(path, iValue);
+                    }
+                    if (value instanceof int[] iValue) {
+                        log(path, iValue);
+                    }
+                    if (value instanceof String sValue) {
+                        log(path, sValue);
+                    }
+                    if (value instanceof String[] sValue) {
+                        log(path, sValue);
+                    }
+                    if (value instanceof Measure unit) {
+                        log(path+"/"+field.getName(), unit.magnitude());
+                    }
+                    if (value instanceof LoggableHardware hardware) {
+                        process(path+"/"+field.getName(), hardware);
+                    }
                 }
-                if (value instanceof double[] dvalue) {
-                    log(path+"/"+field.getName(), dvalue);
-                }
-                if (value instanceof Measure unit) {
-                    log(path+"/"+field.getName(), unit.magnitude());
+            } catch(IllegalAccessException e) {
+                // do nothing
+            }
+        }
+    }
+
+    public static void process(String path, LoggableHardware hardware) {
+        Class<?> loggedClass = hardware.getClass();
+        Field[] fields = loggedClass.getFields();
+        for (Field field : fields) {
+            try {
+                Object value = field.get(hardware);
+                if (value != null) {
+                    if (value instanceof Double dvalue) {
+                        log(path+"/"+field.getName(), dvalue);
+                    }
+                    if (value instanceof double[] dvalue) {
+                        log(path+"/"+field.getName(), dvalue);
+                    }
+                    if (value instanceof Boolean bValue) {
+                        log(path+"/"+field.getName(), bValue);
+                    }
+                    if (value instanceof boolean[] bValue) {
+                        log(path, bValue);
+                    }
+                    if (value instanceof Integer iValue) {
+                        log(path, iValue);
+                    }
+                    if (value instanceof int[] iValue) {
+                        log(path, iValue);
+                    }
+                    if (value instanceof String sValue) {
+                        log(path, sValue);
+                    }
+                    if (value instanceof String[] sValue) {
+                        log(path, sValue);
+                    }
+                    if (value instanceof Measure unit) {
+                        log(path+"/"+field.getName(), unit.magnitude());
+                    }
                 }
             } catch(IllegalAccessException e) {
                 // do nothing
