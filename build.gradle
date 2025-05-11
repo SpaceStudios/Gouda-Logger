@@ -147,7 +147,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = 'log.gouda'
-            artifactId = 'GoudaLogger'
+            artifactId = 'gouda-logger'
             version = "${frcCompatibleYear}.${currentVersion}"
             
             from components.java
