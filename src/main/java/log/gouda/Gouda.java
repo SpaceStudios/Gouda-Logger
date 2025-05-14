@@ -4,13 +4,10 @@
 
 package log.gouda;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.KeyStore.Entry;
 import java.util.Arrays;
 import java.util.HashMap;
-
-import javax.crypto.spec.IvParameterSpec;
 
 import edu.wpi.first.math.geometry.Ellipse2d;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -63,7 +60,6 @@ import edu.wpi.first.networktables.Subscriber;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DataLogEntry;
-import edu.wpi.first.util.datalog.DataLogWriter;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.StructArrayLogEntry;
 import edu.wpi.first.util.datalog.StructLogEntry;
@@ -72,11 +68,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import log.gouda.loggingUtil.Loggable;
 import log.gouda.loggingUtil.LoggableHardware;
 

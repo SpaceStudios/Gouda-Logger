@@ -1,5 +1,6 @@
 import org.apache.tools.ant.taskdefs.condition.Os
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 
 plugins {
     id "java-library"
@@ -14,10 +15,35 @@ java {
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
+// Generating Json Stuff
+def repositoryStuff = "https://spacestudios.github.io/maven-pages-repo/maven/"
 def inputFile = new File("./.wpilib/wpilib_preferences.json")
-def json = new JsonSlurper().parseText(inputFile.Text)
+def json =  new JsonSlurper().parseText(inputFile.Text)
+def projectJson =  new JsonSlurper().parseText(new File("./projectSettings.json").Text)
 String frcCompatibleYear = json.projectYear
-String currentVersion = "0.1"
+String currentVersion = projectJson.version
+
+class CreateVendorDep extends DefaultTask {
+    @TaskAction
+    void action() {
+        def repositoryStuff = "https://spacestudios.github.io/maven-pages-repo/maven/"
+        def inputFile = new File("./.wpilib/wpilib_preferences.json")
+        def json = new JsonSlurper().parseText(inputFile.Text)
+        def projectJson = new JsonSlurper().parseText(new File("./projectSettings.json").Text)
+        String frcCompatibleYear = json.projectYear
+        String currentVersion = projectJson.version
+        
+        def prevJson = new File("./generated/gouda-logger-latest.json")
+        def vendorProcessedJson = new JsonSlurper().parseText(prevJson.Text)
+        prevJson.renameTo(new File("./generated/prevVendordeps/gouda-logger-${vendorProcessedJson.version}.json"))
+        def newVendorDepJson = new File("./generated/gouda-logger-latest.json")
+        System.out.println(frcCompatibleYear)
+        def notOutput = JsonOutput.toJson([javaDependencies: [[groupId: "log.gouda", artifactId: "gouda-logger", version: (frcCompatibleYear+"."+currentVersion)]], fileName: "gouda-logger-latest.json", frcYear: frcCompatibleYear, jsonUrl: "", name: "Gouda Logger", jniDependencies: [], mavenUrls: [repositoryStuff],cppDependencies:[],version: (frcCompatibleYear+"."+currentVersion), uuid: "82ebd53a-dd2e-48ac-afb2-5672518ab83e"])
+        def outputJson = JsonOutput.prettyPrint(notOutput)
+        newVendorDepJson.write(outputJson)
+    }
+}   
+tasks.register("generateVendorDep", CreateVendorDep)
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -135,13 +161,19 @@ publishing {
             url frcHomeMaven
         }
 
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/SpaceStudios/Gouda-Logger")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USER")
-                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        if (Os.isFamily(Os.FAMILY_UNIX)) {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/SpaceStudios/Gouda-Logger")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USER")
+                    password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+                }
             }
+        }
+        maven {
+            name = "WebsitePost"
+            url = "file://C:/Users/macsk/OneDrive/Desktop/Programming/Maven Website/maven"
         }
     }
     publications {

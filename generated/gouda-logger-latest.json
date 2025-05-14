@@ -1,0 +1,24 @@
+{
+    "javaDependencies": [
+        {
+            "groupId": "log.gouda",
+            "artifactId": "gouda-logger",
+            "version": "2025.0.1"
+        }
+    ],
+    "fileName": "gouda-logger-latest.json",
+    "frcYear": "2025",
+    "jsonUrl": "",
+    "name": "Gouda Logger",
+    "jniDependencies": [
+        
+    ],
+    "mavenUrls": [
+        "https://spacestudios.github.io/maven-pages-repo/maven/"
+    ],
+    "cppDependencies": [
+        
+    ],
+    "version": "2025.0.1",
+    "uuid": "82ebd53a-dd2e-48ac-afb2-5672518ab83e"
+}
